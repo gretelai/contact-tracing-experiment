@@ -1,31 +1,36 @@
 import random
+import datetime
+from typing import List
 
-from handset import Handset
+from handset import Handset, Contact
 from cloud import Cloud
 
 ONE_HOUR = 3600
 ONE_DAY = 86400
 
 
-def get_handsets(count):
-    return [Handset() for _ in range(0, count)]
+def get_handsets(count, relation):
+    return [Handset(relation) for _ in range(0, count)]
 
 
 class Life:
 
     def __init__(self, start_time: int):
-        self.family = get_handsets(random.randrange(2, 8))
-        self.friends = get_handsets(random.randrange(10, 20))
-        self.coworkers = get_handsets(random.randrange(15, 40))
-        self.others = get_handsets(random.randrange(40, 100))
+        self.family = get_handsets(random.randrange(2, 8), 'family')
+        self.friends = get_handsets(random.randrange(10, 20), 'friend')
+        self.coworkers = get_handsets(random.randrange(15, 40), 'coworker')
+        self.others = get_handsets(random.randrange(40, 100), 'other')
 
         self.all_handsets = self.family + self.friends + self.coworkers + self.others  # noqa
 
         # this is the current date/time for the simulation
         self.time = start_time
 
+        # save off the actual start time for reporting
+        self.start_time = datetime.datetime.utcfromtimestamp(start_time).isoformat()  # noqa
+
         # the person that eventually will contract C19
-        self.subject = Handset()
+        self.subject = Handset('subject')
 
         self.cloud = Cloud()
 
@@ -65,6 +70,29 @@ class Life:
 
         other.receive_rpi(subject_rpi)
         self.subject.receive_rpi(other_rpi)
+
+    def generate_report(self):
+        with open('report.txt', 'w') as fp:
+            fp.write(f'Simulation Start Time: {self.start_time}\n\n')
+            fp.write(f'Family Count: {len(self.family)}\n')
+            fp.write(f'Friend Count: {len(self.friends)}\n')
+            fp.write(f'Coworker Count: {len(self.coworkers)}\n')
+            fp.write(f'Other Count: {len(self.others)}\n\n')
+
+            contacts = self.find_contacts()
+            contact_list: List[Contact]
+            for contact_list in contacts:
+                if not contact_list:
+                    continue
+                # write metadata about the handset using the first Contact
+                fp.write('-'*20 + '\n')
+                fp.write(f'Handset ID: {contact_list[0].uuid}\n')
+                fp.write(f'Relation to subject: {contact_list[0].relation} [SIMULATION DATA ONLY, would not be revealed real-world] \n')  # noqa
+                fp.write(f'Contact periods:\n')
+                # write out the timestamps this handset had close
+                # contact with the subject
+                for contact in contact_list:
+                    fp.write(f'\t\t{contact.ts}\n')
 
     def hour(self, focus: str):
         self.time += ONE_HOUR
@@ -159,3 +187,9 @@ class Life:
         self.hour('others')
 
         self.time = day_start + ONE_DAY
+
+
+if __name__ == '__main__':
+    life = Life(1586761200)
+    life.start()
+    life.generate_report()

@@ -36,12 +36,25 @@ class DTK:
         self.day_str = self.dt.isoformat()
 
 
+@dataclass
+class Contact:
+    rpi: str
+    epoch: Type[Number]
+    ts: str
+    relation: str
+    uuid: str
+
+
 class Handset:
 
-    def __init__(self):
+    def __init__(self, relation):
         # assign a UUID to the handset, this would really be a IMEI, etc but
         # doesn't really matter for our purposes
         self.uuid = uuid.uuid4().hex
+
+        # NOTE: this is to help provide context during the
+        # simulation
+        self.relation = relation
 
         # generate the single Tracing Key for the handset
         self.tracing_key = secrets.token_hex(32).encode()
@@ -69,7 +82,7 @@ class Handset:
 
     @staticmethod
     def _rpi(k: bytes, tin: int):
-        return hmac.new(k, ('CT_RPI'+str(tin)).encode(), sha256).hexdigest()  # noqa
+        return hmac.new(k, ('CT-RPI'+str(tin)).encode(), sha256).hexdigest()  # noqa
 
     def get_rpi(self, seed_epoch: Number):
         # first we need to get the daily trace key
@@ -115,5 +128,12 @@ class Handset:
         remote_rpis = set(list(master_map.keys()))
         inter = remote_rpis & self.other_rpis
 
-        res = [(rpi, master_map[rpi], datetime.datetime.utcfromtimestamp(master_map[rpi]).isoformat()) for rpi in inter]  # noqa
-        return sorted(res, key=lambda t: t[1])
+        res = [Contact(
+            rpi=rpi,
+            epoch=master_map[rpi],
+            ts=datetime.datetime.utcfromtimestamp(master_map[rpi]).isoformat(),
+            relation=self.relation,
+            uuid=self.uuid
+            ) for rpi in inter]  # noqa
+
+        return sorted(res, key=lambda t: t.epoch)
