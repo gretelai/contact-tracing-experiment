@@ -1,6 +1,6 @@
 # Apple + Google Contact Tracing
 
-Rudimenatry implemenation of the Apple + Google [contact tracing specification](https://www.apple.com/covid19/contacttracing)
+Simple implementation of the Apple + Google [contact tracing specification](https://www.apple.com/covid19/contacttracing)
 
 This simulation runs a series of mock "proximity interactions" between a single subject and a collection of other handsets that 
 belong to family, friends, coworkers, and other random people.
