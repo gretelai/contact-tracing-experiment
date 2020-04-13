@@ -70,7 +70,7 @@ class Handset:
         dtk = DTK(seed_epoch)
         key = HKDF(
             self.tracing_key,
-            16,  # 16 byte kye
+            16,  # 16 byte key
             b'',
             SHA256,
             num_keys=1,
