@@ -35,6 +35,10 @@ class Life:
         self.cloud = Cloud()
 
     def start(self):
+        """This is the main entrypoint for running the simulation, the
+        called functions here are just helpers to create common patterns
+        of interaction
+        """
         for _ in range(0, 5):
             self.weekday()
 
@@ -97,6 +101,7 @@ class Life:
                     fp.write(f'\t\t{contact.ts}\n')
 
     def hour(self, focus: str):
+        
         self.time += ONE_HOUR
 
         if focus == 'family':
