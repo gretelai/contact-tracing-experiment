@@ -54,17 +54,17 @@ class Handset:
         self.other_rpis = set()
 
     def create_daily_tracing_key(self, seed_epoch: Number):  # noqa
-        day_number = DTK(seed_epoch)
+        dtk = DTK(seed_epoch)
         key = HKDF(
             self.tracing_key,
             16,  # 16 byte kye
             b'',
             SHA256,
             num_keys=1,
-            context=('CT-DTK' + str(day_number.day_number)).encode()
+            context=('CT-DTK' + str(dtk.day_number)).encode()
         ).hex()
-        day_number.key = key
-        self.daily_trace_keys[day_number.day_number] = day_number
+        dtk.key = key
+        self.daily_trace_keys[dtk.day_number] = dtk
         return key
 
     @staticmethod
