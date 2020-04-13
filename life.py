@@ -53,6 +53,8 @@ class Life:
         # to be made available to all other
         # users
         for _, dtk in list(self.subject.daily_trace_keys.items()):
+            # NOTE: see how easy it is to just slip in the 
+            # handset UUID? You don't need to for this to work!
             self.cloud.add_dtk(self.subject.uuid, dtk)
 
     def find_contacts(self):

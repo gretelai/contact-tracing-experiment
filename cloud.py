@@ -7,6 +7,9 @@ class Cloud:
         self.diagnosis_keys = defaultdict(list)
 
     def add_dtk(self, uuid, dtk):
+        """We track all DTKs for a given handset UUID, but really
+        you don't need to do this
+        """
         self.diagnosis_keys[uuid].append(dtk)
 
     def download_dtks(self):
