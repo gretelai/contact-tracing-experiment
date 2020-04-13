@@ -47,14 +47,8 @@ class Life:
         # past DTKs are uploaded to the cloud
         # to be made available to all other
         # users
-        #
-        # we'll just take the last 7 days for now
-        count = 0
-        for _, dtk in reversed(list(self.subject.daily_trace_keys.items())):
+        for _, dtk in list(self.subject.daily_trace_keys.items()):
             self.cloud.add_dtk(self.subject.uuid, dtk)
-            count += 1
-            if count > 20:
-                break
 
     def find_contacts(self):
         """Go through all of the handsets and find
