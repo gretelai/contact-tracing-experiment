@@ -2,8 +2,7 @@ import random
 import datetime
 from typing import List
 
-from handset import Handset, Contact
-from cloud import Cloud
+from handset import Handset, Contact, TEK
 
 ONE_HOUR = 3600
 ONE_DAY = 86400
@@ -11,6 +10,15 @@ ONE_DAY = 86400
 
 def get_handsets(count, relation):
     return [Handset(relation) for _ in range(0, count)]
+
+
+class Cloud:
+
+    def __init__(self):
+        self.diagnosis_keys = []
+
+    def add_tek(self, tek: TEK):
+        self.diagnosis_keys.append(tek)
 
 
 class Life:
@@ -51,15 +59,7 @@ class Life:
         self.weekend()
         self.weekend()
 
-        # assume a positive diagnosis
-        # so that would mean the subject's
-        # past DTKs are uploaded to the cloud
-        # to be made available to all other
-        # users
-        for _, dtk in list(self.subject.daily_trace_keys.items()):
-            # NOTE: see how easy it is to just slip in the 
-            # handset UUID? You don't need to for this to work!
-            self.cloud.add_dtk(self.subject.uuid, dtk)
+        self.subject.upload_teks(self.cloud)
 
     def find_contacts(self):
         """Go through all of the handsets and find
@@ -101,7 +101,7 @@ class Life:
                     fp.write(f'\t\t{contact.ts}\n')
 
     def hour(self, focus: str):
-        
+
         self.time += ONE_HOUR
 
         if focus == 'family':
@@ -125,11 +125,13 @@ class Life:
     def weekday(self):
         day_start = self.time  # save the first hour of our day
 
-        # starting a new day, generate the DTK
+        # starting a new day, generate the TEK
         # for each handset
-        self.subject.create_daily_tracing_key(self.time)
+
+        self.subject.create_tek(self.time)
+
         for h in self.all_handsets:
-            h.create_daily_tracing_key(self.time)
+            h.create_tek(self.time)
 
         # spend a couple hours in the morning with family
         self.hour('family')
@@ -166,9 +168,10 @@ class Life:
     def weekend(self):
         day_start = self.time
 
-        self.subject.create_daily_tracing_key(self.time)
+        self.subject.create_tek(self.time)
+
         for h in self.all_handsets:
-            h.create_daily_tracing_key(self.time)
+            h.create_tek(self.time)
 
         self.hour('family')
         self.hour('family')
